@@ -52,7 +52,7 @@ spec:
     - name: OAR_SERVER_HOSTNAME
       value: "hpc-scheduler"
     command: ["/bin/bash"]
-    args: ["/start.sh"]
+    args: ["/start-almighty.sh"]
   dnsConfig:
     searches:
       - nodes.oar.svc.cluster.local
@@ -83,17 +83,17 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: dev-python
+  name: controller
   namespace: oar
   labels:
-    name: dev-python
+    name: controller
     net: headless
 spec:
-  hostname: dev-python
+  hostname: controller
   subdomain: nodes
   containers:
-  - image: python
-    name: python
+  - image: nyk0/chsc-oar-controller
+    name: controller
     command: [ "/bin/bash", "-c", "--" ]
     args: [ "while true; do sleep 30; done;" ]
   dnsConfig:
