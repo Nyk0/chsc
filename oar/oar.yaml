@@ -18,9 +18,9 @@ metadata:
     net: headless
     role: scheduler
   annotations:
-    default/nodes: "5"
+    default/nodes: "3"
     default/cpuspernode: "2"
-    default/image: "nginx"
+    default/image: "nyk0/chsc-oar"
     default/hostnamebase: "hpc-node"
 spec:
   hostname: hpc-scheduler
