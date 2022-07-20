@@ -6,7 +6,7 @@ RUN echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-f
     libpq-dev git perl perl-base openssh-client openssh-server libdbi-perl \
     libsort-versions-perl libterm-ui-perl libjson-perl taktuk libdbd-pg-perl \
     perl perl-base libdbi-perl libjson-perl libyaml-perl libwww-perl apache2 \
-    libcgi-fast-perl libapache2-mod-wsgi-py3 less vim.tiny netcat git \
+    libcgi-fast-perl libapache2-mod-wsgi-py3 less vim.tiny netcat git postgresql-client \
   && mkdir -p /run/sshd \
   && apt-get clean \
   && pip install poetry \

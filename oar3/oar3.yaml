@@ -1,4 +1,19 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oar3conf
+  namespace: oar
+data:
+  PG_HOST: "db-server"
+  PG_PORT: "5432"
+  PG_OAR_BASE_NAME: "oar"
+  PG_OAR_BASE_USERNAME: "oar"
+  PG_OAR_BASE_USERPASS: "azerty"
+  PG_OAR_BASE_USERNAME_RO: "oar_ro"
+  PG_OAR_BASE_USERPASS_RO: "azerty"
+  OAR_SERVER_HOSTNAME: "hpc-scheduler"
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: nodes
@@ -20,7 +35,7 @@ metadata:
   annotations:
     default/nodes: "3"
     default/cpuspernode: "2"
-    default/image: "nyk0/chsc-oar"
+    default/image: "nyk0/chsc-oar3"
     default/hostnamebase: "hpc-node"
 spec:
   hostname: hpc-scheduler
@@ -32,25 +47,11 @@ spec:
       'until pg_isready -h db-server -p 5432; 
       do echo waiting for database; sleep 2; done;']
   containers:
-  - image: nyk0/chsc-oar
+  - image: nyk0/chsc-oar3
     name: oar-server
-    env:
-    - name: PG_HOST
-      value: "db-server"
-    - name: PG_PORT
-      value: "5432"
-    - name: PG_OAR_BASE_NAME
-      value: "oar"
-    - name: PG_OAR_BASE_USERNAME
-      value: "oar"
-    - name: PG_OAR_BASE_USERPASS
-      value: "azerty"
-    - name: PG_OAR_BASE_USERNAME_RO
-      value: "oar_ro"
-    - name: PG_OAR_BASE_USERPASS_RO
-      value: "azerty"
-    - name: OAR_SERVER_HOSTNAME
-      value: "hpc-scheduler"
+    envFrom:
+    - configMapRef:
+        name: oar3conf
     command: ["/bin/bash"]
     args: ["/start-almighty.sh"]
   dnsConfig:
