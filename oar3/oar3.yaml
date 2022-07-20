@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodes
+  namespace: oar
+spec:
+  selector:
+    net: headless
+  clusterIP: None
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hpc-scheduler
+  namespace: oar
+  labels:
+    name: hpc-scheduler
+    net: headless
+    role: scheduler
+  annotations:
+    default/nodes: "3"
+    default/cpuspernode: "2"
+    default/image: "nyk0/chsc-oar"
+    default/hostnamebase: "hpc-node"
+spec:
+  hostname: hpc-scheduler
+  subdomain: nodes
+  initContainers:
+  - name: check-postgres
+    image: postgres
+    command: ['sh', '-c', 
+      'until pg_isready -h db-server -p 5432; 
+      do echo waiting for database; sleep 2; done;']
+  containers:
+  - image: nyk0/chsc-oar
+    name: oar-server
+    env:
+    - name: PG_HOST
+      value: "db-server"
+    - name: PG_PORT
+      value: "5432"
+    - name: PG_OAR_BASE_NAME
+      value: "oar"
+    - name: PG_OAR_BASE_USERNAME
+      value: "oar"
+    - name: PG_OAR_BASE_USERPASS
+      value: "azerty"
+    - name: PG_OAR_BASE_USERNAME_RO
+      value: "oar_ro"
+    - name: PG_OAR_BASE_USERPASS_RO
+      value: "azerty"
+    - name: OAR_SERVER_HOSTNAME
+      value: "hpc-scheduler"
+    command: ["/bin/bash"]
+    args: ["/start-almighty.sh"]
+  dnsConfig:
+    searches:
+      - nodes.oar.svc.cluster.local
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: db-server
+  namespace: oar
+  labels:
+    name: db-server
+    net: headless
+spec:
+  hostname: db-server
+  subdomain: nodes
+  containers:
+  - image: postgres
+    name: postgres
+    env:
+    - name: POSTGRES_PASSWORD
+      value: "azerty"
+    - name: POSTGRES_USER
+      value: "root"
+  dnsConfig:
+    searches:
+      - nodes.oar.svc.cluster.local
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: controller
+  namespace: oar
+  labels:
+    name: controller
+    net: headless
+spec:
+  hostname: controller
+  subdomain: nodes
+  containers:
+  - image: nyk0/chsc-oar-controller
+    name: controller
+    command: [ "/bin/bash", "-c", "--" ]
+    args: [ "while true; do sleep 30; done;" ]
+  dnsConfig:
+    searches:
+      - nodes.oar.svc.cluster.local
