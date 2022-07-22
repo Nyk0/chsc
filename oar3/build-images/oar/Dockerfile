@@ -13,7 +13,7 @@ RUN echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-f
   && git clone https://github.com/oar-team/oar3.git \
   && useradd -u 1000 nico -s /bin/bash
 
-COPY start-almighty.sh start-node.sh generate-config.sh register.sh ./
+COPY start-almighty.sh start-node.sh generate-config.sh register.sh start-api.sh ./
 COPY oar-restful-api.conf /etc/apache2/sites-available/
 
 WORKDIR /oar3
