@@ -63,6 +63,13 @@ spec:
         name: oar3conf
     command: ["/bin/bash"]
     args: ["/start-almighty.sh"]
+    volumeMounts:
+        - mountPath: /home
+          name: home
+  volumes:
+    - name: home
+      persistentVolumeClaim:
+        claimName: pvc-nfs-home
   dnsConfig:
     searches:
       - nodes.oar.svc.cluster.local
@@ -84,8 +91,8 @@ spec:
     envFrom:
     - configMapRef:
         name: oar3conf
-#    command: ["/bin/bash"]
-#    args: ["/start-almighty.sh"]
+    command: ["/bin/bash"]
+    args: ["/start-api.sh"]
   dnsConfig:
     searches:
       - nodes.oar.svc.cluster.local
