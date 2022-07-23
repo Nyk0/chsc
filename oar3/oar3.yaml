@@ -12,13 +12,7 @@ data:
   PG_OAR_BASE_USERNAME_RO: "oar_ro"
   PG_OAR_BASE_USERPASS_RO: "azerty"
   OAR_SERVER_HOSTNAME: "hpc-scheduler"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: controllerconf
-  namespace: oar
-data:
+  KUBERNETES_NAMESPACE: "oar"
   API_HOST: "api-server"
   API_PORT: "6668"
 ---
@@ -132,11 +126,11 @@ spec:
   hostname: controller
   subdomain: nodes
   containers:
-  - image: nyk0/chsc-oar-controller
+  - image: nyk0/chsc-oar3
     name: controller
     envFrom:
     - configMapRef:
-        name: controllerconf
+        name: oar3conf
     command: [ "/bin/bash", "-c", "--" ]
     args: [ "while true; do sleep 30; done;" ]
   dnsConfig:
