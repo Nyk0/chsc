@@ -13,8 +13,14 @@ data:
   PG_OAR_BASE_USERPASS_RO: "azerty"
   OAR_SERVER_HOSTNAME: "hpc-scheduler"
   KUBERNETES_NAMESPACE: "oar"
+  ALMIGHTY_CONTAINER: "oar-server"
   API_HOST: "api-server"
   API_PORT: "6668"
+  HOME_PVC: "pvc-nfs-home"
+  HOME_MOUNT_NAME: "home"
+  HOME_MOUNT_PATH: "/home"
+  NET_SERVICE: "nodes"
+  KUBERNETES_DOMAIN: "svc.cluster.local"
 ---
 apiVersion: v1
 kind: Service
@@ -52,6 +58,7 @@ spec:
   containers:
   - image: nyk0/chsc-oar3
     name: oar-server
+    workingDir: /
     envFrom:
     - configMapRef:
         name: oar3conf
@@ -82,6 +89,7 @@ spec:
   containers:
   - image: nyk0/chsc-oar3
     name: api-server
+    workingDir: /
     envFrom:
     - configMapRef:
         name: oar3conf
@@ -128,6 +136,7 @@ spec:
   containers:
   - image: nyk0/chsc-oar3
     name: controller
+    workingDir: /
     envFrom:
     - configMapRef:
         name: oar3conf
