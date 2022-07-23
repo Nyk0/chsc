@@ -14,7 +14,7 @@ RUN echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-f
   && useradd -u 1000 nico -s /bin/bash \
   && pip install --upgrade pip && pip install kubernetes
 
-COPY start-almighty.sh start-node.sh generate-config.sh register.sh start-api.sh ./
+COPY start-almighty.sh start-node.sh generate-config.sh register.sh start-api.sh controller.py ./
 COPY oar-restful-api.conf /etc/apache2/sites-available/
 
 WORKDIR /oar3
