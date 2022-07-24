@@ -34,13 +34,15 @@ def createPod(k8sConnect, queueName, queuesDict, k8sNamespace, podName, containe
 	containerResources = client.V1ResourceRequirements(requests={"cpu" : queuesDict[queueName]['cpuspernode']}, limits={"cpu" : queuesDict[queueName]['cpuspernode']})
 	containers = []
 	mount = client.V1VolumeMount(name=homeName, mount_path=homePath, read_only=False)
-	container1 = client.V1Container(name='hpc-worker', image=queuesDict[queueName]['image'], resources=containerResources, env_from=containerEnv, command=containerCommand, volume_mounts=[mount], args=containerArgs)
+	capChroot = client.V1Capabilities(add=["SYS_CHROOT"])
+	security = client.V1SecurityContext(capabilities=capChroot)
+	container1 = client.V1Container(name='hpc-worker', image=queuesDict[queueName]['image'], resources=containerResources, env_from=containerEnv, command=containerCommand, volume_mounts=[mount], args=containerArgs, security_context=security)
 	containers.append(container1)
 	claim = client.V1PersistentVolumeClaimVolumeSource(claim_name=homePVC, read_only=False)
 	volume = client.V1Volume(name=homeName, persistent_volume_claim=claim)
 	defaultDomain = os.environ['NET_SERVICE'] + '.' + os.environ['KUBERNETES_NAMESPACE'] + '.' + os.environ['KUBERNETES_DOMAIN']
 	dnsSearch = client.V1PodDNSConfig(searches=[defaultDomain])
-	pod_spec = client.V1PodSpec(containers=containers, volumes=[volume], subdomain=os.environ['NET_SERVICE'], dns_config=dnsSearch)
+	pod_spec = client.V1PodSpec(containers=containers, hostname=podName, volumes=[volume], subdomain=os.environ['NET_SERVICE'], dns_config=dnsSearch)
 	print(str(pod_spec))
 	pod_metadata = client.V1ObjectMeta(name=podName, namespace=k8sNamespace, labels={'role': 'worker', 'net': 'headless'})
 	pod_body = client.V1Pod(api_version='v1', kind='Pod', metadata=pod_metadata, spec=pod_spec)

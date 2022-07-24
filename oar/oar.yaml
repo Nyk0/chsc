@@ -69,6 +69,9 @@ spec:
     volumeMounts:
         - mountPath: /home
           name: home
+    securityContext:
+      capabilities:
+        add: ["NET_RAW"]
   volumes:
     - name: home
       persistentVolumeClaim:
