@@ -23,7 +23,7 @@ DEPLOY_HOSTNAME="127.0.0.1"
 COSYSTEM_HOSTNAME="127.0.0.1"
 DETACH_JOB_FROM_SERVER="1"
 OPENSSH_CMD="/usr/bin/ssh -p 6667 -e none"
-FINAUD_FREQUENCY="300"
+FINAUD_FREQUENCY="$FINAUD_FREQUENCY"
 PINGCHECKER_SENTINELLE_SCRIPT_COMMAND="/usr/lib/oar/sentinelle.pl -t 30 -w 20 -c 'ssh -p 6667 -l oar -i /var/lib/oar/.ssh/id_rsa -o StrictHostKeyChecking=no'"
 SCHEDULER_TIMEOUT="30"
 SCHEDULER_NB_PROCESSES=1
@@ -42,5 +42,5 @@ OARSH_OARSTAT_CMD="/usr/bin/oarstat"
 OPENSSH_OPTSTR="1246ab:c:e:fgi:kl:m:no:p:qstvxAB:CD:E:F:GI:J:KL:MNO:PQ:R:S:TVw:W:XYy"
 OPENSSH_OPTSTR_FILTERED="1246b:c:fm:nqstvxBCNPQ:TVXYy"
 OARSH_OPENSSH_DEFAULT_OPTIONS="-e none -oProxyCommand=none -oPermitLocalCommand=no -oUserKnownHostsFile=/var/lib/oar/.ssh/known_hosts"
-OARSTAT_DEFAULT_OUTPUT_FORMAT=2'
+OARSTAT_DEFAULT_OUTPUT_FORMAT=2
 EOF
