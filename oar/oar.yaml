@@ -14,6 +14,7 @@ data:
   DB_OAR_BASE_USERPASS_RO: "azerty"
   OAR_SERVER_HOSTNAME: "hpc-scheduler"
   OAR_SERVER_PORT: "6666"
+  FINAUD_FREQUENCY: "300"
   KUBERNETES_NAMESPACE: "oar"
   ALMIGHTY_CONTAINER: "oar-server"
   API_HOST: "api-server"
