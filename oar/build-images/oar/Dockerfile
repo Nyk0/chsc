@@ -7,6 +7,7 @@ RUN echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-f
   less vim.tiny netcat git postgresql-client taktuk \
   && apt-get clean \
   && useradd -u 1000 nico -s /bin/bash \
+  && mkdir -p /var/run/sshd \
   && pip install --upgrade pip && pip install kubernetes
 
 COPY start-almighty.sh start-node.sh generate-config.sh register.sh controller.py create-resources.sh ./
