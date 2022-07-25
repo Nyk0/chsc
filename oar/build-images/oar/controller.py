@@ -44,7 +44,6 @@ def createPod(k8sConnect, queueName, queuesDict, k8sNamespace, podName, containe
 	defaultDomain = os.environ['NET_SERVICE'] + '.' + os.environ['KUBERNETES_NAMESPACE'] + '.' + os.environ['KUBERNETES_DOMAIN']
 	dnsSearch = client.V1PodDNSConfig(searches=[defaultDomain])
 	pod_spec = client.V1PodSpec(containers=containers, hostname=podName, volumes=[volume], subdomain=os.environ['NET_SERVICE'], dns_config=dnsSearch)
-	print(str(pod_spec))
 	pod_metadata = client.V1ObjectMeta(name=podName, namespace=k8sNamespace, labels={'role': 'worker', 'net': 'headless'})
 	pod_body = client.V1Pod(api_version='v1', kind='Pod', metadata=pod_metadata, spec=pod_spec)
 	k8sConnect.create_namespaced_pod(namespace='oar', body=pod_body)
@@ -59,9 +58,19 @@ def addPod(k8sConnect, queueName, queuesDict, k8sNamespace, containerEnv, homePV
 			i += 1 
 		except ApiException as e:
 			createPod(k8sConnect, queueName, queuesDict, k8sNamespace, podName, containerEnv, homePVC, homeName, homePath, containerCommand, containerArgs)
-			return True
+			return podName
 	return False
 		
+def checkForNodeAlive(nodeName):
+
+	oarnodesOut = subprocess.run(['oarnodes', '-J'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+	nodes = json.loads(oarnodesOut)
+	print(str(nodes))
+	for key in nodes:
+		if nodes[key]['network_address'] == nodeName and nodes[key]['state'] == "Absent":
+			print(nodes[key]['network_address'] + " => " + nodes[key]['state'])
+			return False
+	return True
 
 if __name__ == '__main__':
 
@@ -74,4 +83,17 @@ if __name__ == '__main__':
 	cmd = ['/bin/bash', '/create-resources.sh', queues['default']['nodes'], queues['default']['cpuspernode'], queues['default']['hostnamebase']]
 	subprocess.Popen(cmd).wait()
 
-	#addPod(c, "default", queues, os.environ['KUBERNETES_NAMESPACE'], schedulerEnv, os.environ['HOME_PVC'], os.environ['HOME_MOUNT_NAME'], os.environ['HOME_MOUNT_PATH'], ["/bin/bash"], ["/start-node.sh"])
+	while(True):
+
+		oarstatOut = subprocess.run(['oarstat', '-f', '-J'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+		try:
+			jobs = json.loads(oarstatOut)
+		except json.decoder.JSONDecodeError:
+			print("No jobs running")
+			jobs = {}
+		for key in jobs :
+			if jobs[key]['state'] == "Waiting":
+				addedNode = addPod(c, "default", queues, os.environ['KUBERNETES_NAMESPACE'], schedulerEnv, os.environ['HOME_PVC'], os.environ['HOME_MOUNT_NAME'], os.environ['HOME_MOUNT_PATH'], ["/bin/bash"], ["/start-node.sh"])
+				while(checkForNodeAlive(addedNode) is False):
+					time.sleep(1)
+		time.sleep(1)
