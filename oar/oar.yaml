@@ -52,12 +52,12 @@ metadata:
 spec:
   hostname: hpc-scheduler
   subdomain: nodes
-  initContainers:
-  - name: check-postgres
-    image: postgres
-    command: ['sh', '-c', 
-      'until pg_isready -h db-server -p 5432; 
-      do echo waiting for database; sleep 2; done;']
+#  initContainers:
+#  - name: check-postgres
+#    image: postgres
+#    command: ['sh', '-c', 
+#      'until pg_isready -h db-server -p 5432; 
+#      do echo waiting for database; sleep 2; done;']
   containers:
   - image: nyk0/chsc-oar
     name: oar-server
