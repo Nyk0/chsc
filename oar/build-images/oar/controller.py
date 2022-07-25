@@ -3,6 +3,7 @@ from kubernetes.client.rest import ApiException
 import time
 import json
 import os
+import subprocess
 
 def getEnvFromVariables(k8sConnect, k8sSchedPodName, k8sSchedPodContainerName, k8sNamespace):
 
@@ -66,6 +67,11 @@ if __name__ == '__main__':
 
 	config.load_incluster_config()
 	c = client.CoreV1Api()
+
 	queues = getQueues(c, os.environ['KUBERNETES_NAMESPACE'], os.environ['OAR_SERVER_HOSTNAME'])
 	schedulerEnv = getEnvFromVariables(c, os.environ['OAR_SERVER_HOSTNAME'], os.environ['ALMIGHTY_CONTAINER'], os.environ['KUBERNETES_NAMESPACE'])
-	addPod(c, "default", queues, os.environ['KUBERNETES_NAMESPACE'], schedulerEnv, os.environ['HOME_PVC'], os.environ['HOME_MOUNT_NAME'], os.environ['HOME_MOUNT_PATH'], ["/bin/bash"], ["/start-node.sh"])
+
+	cmd = ['/bin/bash', '/create-resources.sh', queues['default']['nodes'], queues['default']['cpuspernode'], queues['default']['hostnamebase']]
+	subprocess.Popen(cmd).wait()
+
+	#addPod(c, "default", queues, os.environ['KUBERNETES_NAMESPACE'], schedulerEnv, os.environ['HOME_PVC'], os.environ['HOME_MOUNT_NAME'], os.environ['HOME_MOUNT_PATH'], ["/bin/bash"], ["/start-node.sh"])
