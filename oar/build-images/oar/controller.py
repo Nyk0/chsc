@@ -84,7 +84,6 @@ if __name__ == '__main__':
 	schedulerEnv = getEnvFromVariables(c, os.environ['OAR_SERVER_HOSTNAME'], os.environ['ALMIGHTY_CONTAINER'], os.environ['KUBERNETES_NAMESPACE'])
 
 	acknowlegedJobs = []
-	allJobs = []
 	#cmd = ['/bin/bash', '/create-resources.sh', queues['default']['nodes'], queues['default']['cpuspernode'], queues['default']['hostnamebase']]
 	#subprocess.Popen(cmd).wait()
 
@@ -96,6 +95,7 @@ if __name__ == '__main__':
 		except json.decoder.JSONDecodeError:
 			print("No jobs running")
 			jobs = {}
+		allJobs = []
 		for key in jobs :
 			allJobs.append(jobs[key]['Job_Id'])
 		print("all : " + str(allJobs))
