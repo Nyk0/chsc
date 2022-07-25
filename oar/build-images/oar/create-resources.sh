@@ -3,6 +3,8 @@
 nb_nodes=$1
 cpus_per_node=$2
 
+oarproperty -a cpu -c -a host
+
 nb_cpus=$(( nb_nodes * cpus_per_node ))
 
 i=0
