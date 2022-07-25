@@ -4,7 +4,7 @@ RUN echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-f
   && apt-get update \
   && apt-get install -y make perl python3 bzip2 wget g++ gcc vim.tiny \
   oar-server oar-server-pgsql oar-node oar-user oar-user-pgsql pip \
-  less vim.tiny netcat git postgresql-client taktuk \
+  less vim.tiny netcat git postgresql-client taktuk bind9-host \
   && apt-get clean \
   && useradd -u 1000 nico -s /bin/bash \
   && mkdir -p /var/run/sshd \

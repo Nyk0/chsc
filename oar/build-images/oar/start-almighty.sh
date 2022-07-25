@@ -2,14 +2,18 @@
 
 /bin/bash /generate-config.sh
 
-sleep 5
+until host $DB_HOST
+do
+        sleep 2
+done
 
-oar-database --create --db-admin-user root --db-admin-pass azerty --db-ro-user oar_ro --db-ro-pass azerty --conf /etc/oar/oar.conf
+until pg_isready -h $DB_HOST -p $DB_PORT
+do
+	sleep 2
+done
 
-sleep 2
+oar-database --create --db-admin-user root --db-admin-pass azerty --db-ro-user $DB_OAR_BASE_USERNAME_RO --db-ro-pass $DB_OAR_BASE_USERPASS_RO --conf /etc/oar/oar.conf
 
 oarproperty -a cpu -c -a host
-
-sleep 2
 
 /usr/sbin/Almighty
