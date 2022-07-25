@@ -2,13 +2,16 @@
 
 OAR_SSHD_PORT=6667
 
-reach_sshd=1
-while [ $reach_sshd != 0 ]
+until nc -z `hostname` $OAR_SSHD_PORT
 do
-        nc -z `hostname` $OAR_SSHD_PORT > /dev/null 2>&1
-        reach_sshd=$?
 	sleep 2
-	echo "try to register ..."
 done
+
+until host `hostname`
+do
+	sleep 2
+done
+
+sleep 2
 
 oarnodesetting -h `hostname` -s Alive

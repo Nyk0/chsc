@@ -37,7 +37,10 @@ def createPod(k8sConnect, queueName, queuesDict, k8sNamespace, podName, containe
 	mount = client.V1VolumeMount(name=homeName, mount_path=homePath, read_only=False)
 	capChroot = client.V1Capabilities(add=["SYS_CHROOT"])
 	security = client.V1SecurityContext(capabilities=capChroot)
-	container1 = client.V1Container(name='hpc-worker', image=queuesDict[queueName]['image'], resources=containerResources, env_from=containerEnv, command=containerCommand, volume_mounts=[mount], args=containerArgs, security_context=security)
+	execAction = client.V1ExecAction(command=['/bin/bash', '/register.sh'])
+	lifeCycleHandler = client.V1LifecycleHandler(_exec=execAction)
+	lifeCycle = client.V1Lifecycle(post_start=lifeCycleHandler)
+	container1 = client.V1Container(name='hpc-worker', image=queuesDict[queueName]['image'], resources=containerResources, env_from=containerEnv, command=containerCommand, volume_mounts=[mount], args=containerArgs, security_context=security, lifecycle=lifeCycle)
 	containers.append(container1)
 	claim = client.V1PersistentVolumeClaimVolumeSource(claim_name=homePVC, read_only=False)
 	volume = client.V1Volume(name=homeName, persistent_volume_claim=claim)
@@ -65,10 +68,10 @@ def checkForNodeAlive(nodeName):
 
 	oarnodesOut = subprocess.run(['oarnodes', '-J'], stdout=subprocess.PIPE).stdout.decode('utf-8')
 	nodes = json.loads(oarnodesOut)
-	print(str(nodes))
+	#print(str(nodes))
 	for key in nodes:
 		if nodes[key]['network_address'] == nodeName and nodes[key]['state'] == "Absent":
-			print(nodes[key]['network_address'] + " => " + nodes[key]['state'])
+			#print(nodes[key]['network_address'] + " => " + nodes[key]['state'])
 			return False
 	return True
 
@@ -80,8 +83,10 @@ if __name__ == '__main__':
 	queues = getQueues(c, os.environ['KUBERNETES_NAMESPACE'], os.environ['OAR_SERVER_HOSTNAME'])
 	schedulerEnv = getEnvFromVariables(c, os.environ['OAR_SERVER_HOSTNAME'], os.environ['ALMIGHTY_CONTAINER'], os.environ['KUBERNETES_NAMESPACE'])
 
-	cmd = ['/bin/bash', '/create-resources.sh', queues['default']['nodes'], queues['default']['cpuspernode'], queues['default']['hostnamebase']]
-	subprocess.Popen(cmd).wait()
+	acknowlegedJobs = []
+	allJobs = []
+	#cmd = ['/bin/bash', '/create-resources.sh', queues['default']['nodes'], queues['default']['cpuspernode'], queues['default']['hostnamebase']]
+	#subprocess.Popen(cmd).wait()
 
 	while(True):
 
@@ -92,7 +97,12 @@ if __name__ == '__main__':
 			print("No jobs running")
 			jobs = {}
 		for key in jobs :
-			if jobs[key]['state'] == "Waiting":
+			allJobs.append(jobs[key]['Job_Id'])
+		print("all : " + str(allJobs))
+		for key in jobs :
+			if jobs[key]['state'] == "Waiting" and jobs[key]['Job_Id'] not in acknowlegedJobs:
+				acknowlegedJobs.append(jobs[key]['Job_Id'])
+				print("ack : " + str(acknowlegedJobs))
 				addedNode = addPod(c, "default", queues, os.environ['KUBERNETES_NAMESPACE'], schedulerEnv, os.environ['HOME_PVC'], os.environ['HOME_MOUNT_NAME'], os.environ['HOME_MOUNT_PATH'], ["/bin/bash"], ["/start-node.sh"])
 				while(checkForNodeAlive(addedNode) is False):
 					time.sleep(1)
