@@ -8,7 +8,7 @@ do
         nc -z `hostname` $OAR_SSHD_PORT > /dev/null 2>&1
         reach_sshd=$?
 	sleep 2
-	echo "try to register ..." >> /log
+	echo "try to register ..."
 done
 
-echo "register" >> log
+oarnodesetting -h `hostname` -s Alive
