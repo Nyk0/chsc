@@ -21,6 +21,7 @@ data:
   HOME_MOUNT_PATH: "/home"
   NET_SERVICE: "nodes"
   KUBERNETES_DOMAIN: "svc.cluster.local"
+  WALL_TIME_IDLE_POD: "30"
 ---
 apiVersion: v1
 kind: Service

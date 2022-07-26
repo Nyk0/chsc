@@ -4,6 +4,7 @@ import time
 import json
 import os
 import subprocess
+import threading
 
 def getEnvFromVariables(k8sConnect, k8sSchedPodName, k8sSchedPodContainerName, k8sNamespace):
 
@@ -76,6 +77,32 @@ def checkForNodeAlive(nodeName):
 			return False
 	return True
 
+def removePods(k8sConnect):
+	timeIdle = {}
+	while True:
+		print(str(timeIdle))
+		oarnodesOut = subprocess.run(['oarnodes', '-J'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+		nodes = json.loads(oarnodesOut)
+		for key in nodes:
+			if nodes[key]['state'] == "Alive":
+				if 'jobs' not in nodes[key]:
+					print("idle node " + nodes[key]['network_address'])
+					if nodes[key]['network_address'] not in timeIdle:
+						timeIdle[nodes[key]['network_address']] = 1
+					else:
+						if timeIdle[nodes[key]['network_address']] == 30:
+							print("Destroy " + nodes[key]['network_address'])
+							cmd = ['/usr/sbin/oarnodesetting', '-h', nodes[key]['network_address'], '-s', 'Absent']
+							subprocess.Popen(cmd).wait()
+							timeIdle.pop(nodes[key]['network_address'], None)
+							k8sConnect.delete_namespaced_pod(nodes[key]['network_address'], os.environ['KUBERNETES_NAMESPACE'])
+						else:
+							timeIdle[nodes[key]['network_address']] += 1
+				else:
+					print("working node " + nodes[key]['network_address'])
+					timeIdle.pop(nodes[key]['network_address'], None)
+		time.sleep(1)
+
 if __name__ == '__main__':
 
 	config.load_incluster_config()
@@ -88,24 +115,28 @@ if __name__ == '__main__':
 	#cmd = ['/bin/bash', '/create-resources.sh', queues['default']['nodes'], queues['default']['cpuspernode'], queues['default']['hostnamebase']]
 	#subprocess.Popen(cmd).wait()
 
-	while(True):
+	newpid = os.fork()
+	if newpid == 0:
+		removePods(c)
+	else:
+		while(True):
 
-		oarstatOut = subprocess.run(['oarstat', '-f', '-J'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-		try:
-			jobs = json.loads(oarstatOut)
-		except json.decoder.JSONDecodeError:
-			print("No jobs running")
-			jobs = {}
-		allJobs = []
-		for key in jobs :
-			allJobs.append(jobs[key]['Job_Id'])
-		print("all : " + str(allJobs))
-		for key in jobs :
-			if jobs[key]['state'] == "Waiting" and jobs[key]['Job_Id'] not in acknowlegedJobs:
-				acknowlegedJobs.append(jobs[key]['Job_Id'])
-				print("ack : " + str(acknowlegedJobs))
-				#addedNode = addPod(c, "default", queues, os.environ['KUBERNETES_NAMESPACE'], schedulerEnv, os.environ['HOME_PVC'], os.environ['HOME_MOUNT_NAME'], os.environ['HOME_MOUNT_PATH'], ["/bin/bash"], ["/start-node.sh"])
-				addedNode = addPod(c, "default", queues, os.environ['KUBERNETES_NAMESPACE'], schedulerEnv, os.environ['HOME_PVC'], os.environ['HOME_MOUNT_NAME'], os.environ['HOME_MOUNT_PATH'], ["/bin/bash", "-c", "--"], ["while true; do sleep 30; done;"])
-				while(checkForNodeAlive(addedNode) is False):
-					time.sleep(1)
-		time.sleep(1)
+			oarstatOut = subprocess.run(['oarstat', '-f', '-J'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+			try:
+				jobs = json.loads(oarstatOut)
+			except json.decoder.JSONDecodeError:
+				#print("No jobs running")
+				jobs = {}
+			allJobs = []
+			for key in jobs :
+				allJobs.append(jobs[key]['Job_Id'])
+			#print("all : " + str(allJobs))
+			for key in jobs :
+				if jobs[key]['state'] == "Waiting" and jobs[key]['Job_Id'] not in acknowlegedJobs:
+					acknowlegedJobs.append(jobs[key]['Job_Id'])
+					print("ack : " + str(acknowlegedJobs))
+					addedNode = addPod(c, "default", queues, os.environ['KUBERNETES_NAMESPACE'], schedulerEnv, os.environ['HOME_PVC'], os.environ['HOME_MOUNT_NAME'], os.environ['HOME_MOUNT_PATH'], ["/bin/bash"], ["/start-node.sh"])
+					#addedNode = addPod(c, "default", queues, os.environ['KUBERNETES_NAMESPACE'], schedulerEnv, os.environ['HOME_PVC'], os.environ['HOME_MOUNT_NAME'], os.environ['HOME_MOUNT_PATH'], ["/bin/bash", "-c", "--"], ["while true; do sleep 30; done;"])
+					while(checkForNodeAlive(addedNode) is False):
+						time.sleep(1)
+			time.sleep(1)
