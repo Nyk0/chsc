@@ -4,7 +4,7 @@ This project implements a Kubernetes controller to run containerized HPC schedul
 
 ### 1. Get your Kubernetes cluster
 
-We supply a functional Kubernetes cluster [here](https://drive.google.com/file/d/1JoVi-pmArjVjWMGiwOzfoW77hcQ3mq5H/view?usp=sharing). Here is the MD5 fingerprint :
+We supply a functional Kubernetes cluster [here](https://drive.google.com/file/d/1JoVi-pmArjVjWMGiwOzfoW77hcQ3mq5H/view?usp=sharing). Here is the MD5 fingerprint:
 
 ```bash
 ngreneche@DESKTOP-KSGVO8B:/mnt/d/Offline$ md5sum chsc.ova
