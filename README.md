@@ -56,7 +56,7 @@ Then go to "chsc" directory:
 root@admin:~# cd chsc/
 ```
 
-Create the "oar" Kubernetes namespace and set it as your default namespace :
+Create the "oar" Kubernetes namespace and set it as your default namespace:
 
 ```bash
 root@admin:~/chsc# kubectl create namespace oar
