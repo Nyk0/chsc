@@ -88,7 +88,7 @@ root@admin:~/chsc# kubectl apply -f misc/nfs/pvc-nfs.yaml
 persistentvolumeclaim/pvc-nfs-home created
 ```
 
-### 3. Instantiate the Containerized OAR scheduler
+### 3. Instantiate the containerized OAR scheduler
 
 Go to the "oar" directory and run the YAML manifest :
 
