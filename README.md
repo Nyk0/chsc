@@ -42,7 +42,7 @@ node1   Ready    <none>                 46m   v1.22.3
 node2   Ready    <none>                 46m   v1.22.3
 ```
 
-### 2. Install CSHC requirements
+### 2. Install CHSC requirements
 
 First, clone the repository :
 
