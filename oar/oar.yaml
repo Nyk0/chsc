@@ -122,8 +122,10 @@ spec:
     envFrom:
     - configMapRef:
         name: oarconf
-    command: [ "/bin/bash", "-c", "--" ]
-    args: [ "while true; do sleep 30; done;" ]
+    command: ["/bin/bash"]
+    args: ["/start-controller.sh"]
+    #command: [ "/bin/bash", "-c", "--" ]
+    #args: [ "while true; do sleep 30; done;" ]
   dnsConfig:
     searches:
       - nodes.oar.svc.cluster.local
