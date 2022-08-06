@@ -1,6 +1,6 @@
 # CHSC : Containerized HPC Schedulers in the Cloud
 
-This project implements a Kubernetes controller to run containerized HPC schedulers in the Cloud with autoscaling features. It requires a Kubernetes cluster. This repository contains the code of the controller with all Kubernetes manifests to instantiate containerized HPC schedulers. It should be noticed that for the moment only OAR HPC scheduler is supported. However, we demonstrated that each of the major HPC schedulers (SLURM, OpenPBS and OAR) can grow or shrink dynamically [here](https://link.springer.com/chapter/10.1007/978-3-031-12597-3_13).
+This project implements a Kubernetes controller to run containerized HPC schedulers in the Cloud with autoscaling features. It requires a Kubernetes cluster. This repository contains the code of the controller with all Kubernetes manifests to instantiate containerized HPC schedulers. It should be noticed that for the moment only OAR HPC scheduler is supported. However, we demonstrated that each of the major HPC schedulers (SLURM, OpenPBS and OAR) can grow or shrink dynamically in the paper "A Methodology to Scale Containerized HPC Infrastructures in the Cloud" with the companion artifact available [here](https://link.springer.com/chapter/10.1007/978-3-031-12597-3_13). However controllers supplied with Kubernetes do not handle HPC computing oriented Pods. As a consequence all scaling actions had to be performed by hand denying autoscaling. This project is an implementation of a HPC dedicated controller for Kubernetes that talks with containerized HPC schedulers to perform autoscaling when needed.
 
 ### 1. Get your Kubernetes cluster
 
@@ -26,13 +26,13 @@ We defined a port redirection on "CHSC-Lab-frontal" to reach the node from the l
 nico@DESKTOP-KSGVO8B:~$ ssh -p 2424 root@localhost
 ```
 
-Go to the "admin" node :
+Go to the "admin" node:
 
 ```bash
 root@frontal:~# ssh admin
 ```
 
-And check that the Kubernetes cluster is running :
+And check that the Kubernetes cluster is running:
 
 ```
 root@admin:~#  kubectl get nodes
@@ -44,13 +44,13 @@ node2   Ready    <none>                 46m   v1.22.3
 
 ### 2. Install CHSC requirements
 
-First, clone the repository :
+First, clone the repository:
 
 ```bash
 root@admin:~# git clone https://github.com/Nyk0/chsc.git
 ```
 
-Then go to "chsc" directory :
+Then go to "chsc" directory:
 
 ```bash
 root@admin:~# cd chsc/
@@ -90,7 +90,7 @@ persistentvolumeclaim/pvc-nfs-home created
 
 ### 3. Instantiate the containerized OAR scheduler
 
-Go to the "oar" directory and run the YAML manifest :
+Go to the "oar" directory and run the YAML manifest:
 
 ```bash
 root@admin:~/chsc# cd oar
@@ -105,7 +105,7 @@ pod/db-server created
 pod/controller created
 ```
 
-Containerized OAR cluster is creating :
+Containerized OAR cluster is creating:
 
 ```bash
 root@admin:~/chsc/oar# kubectl get pods
@@ -115,7 +115,7 @@ db-server       0/1     ContainerCreating   0          11s
 hpc-scheduler   0/1     ContainerCreating   0          11s
 ```
 
-Wait few seconds for the Pods to be in "Running" state :
+Wait a few seconds until the Pods reach the "Running" state:
 
 ```bash
 root@admin:~/chsc/oar# kubectl get pods
@@ -125,16 +125,16 @@ db-server       1/1     Running   0          52s
 hpc-scheduler   1/1     Running   0          52s
 ```
 
-You have three Pods :
- * "controller" runs the controller that enables autoscaling of the containerized OAR scheduler. It will create or remove containerized compute nodes depending on the jobs pending in the queue ;
- * "db-server" is used by containerized OAR to store all its information ;
+You have three Pods:
+ * "controller" runs the controller that enables autoscaling of the containerized OAR scheduler. It will create or remove containerized compute nodes depending on the pending jobs in the queue ;
+ * "db-server" is used by containerized OAR to store all its information such as jobs, resources topology, queue etc. ;
  * "hpc-scheduler" contains Almighty, the server part of OAR.
 
 No containerized compute nodes are created for the moment.
 
 ### 4. Submitting the first job
 
-Open a bash sesssion in "hpc-scheduler" Pod :
+Open a bash sesssion in "hpc-scheduler" Pod:
 
 ```bash
 root@admin:~/chsc/oar# kubectl exec -ti hpc-scheduler -- /bin/bash
@@ -150,7 +150,7 @@ nico@hpc-scheduler:~$ id
 uid=1000(nico) gid=1000(nico) groups=1000(nico)
 ```
 
-Check containerized compute nodes status :
+Check containerized compute nodes status:
 
 ```bash
 nico@hpc-scheduler:~$ oarnodes -s
@@ -165,13 +165,13 @@ hpc-node-2
     6 : Absent (standby)
 ```
 
-Nodes are pre-provisioned in an "Absent" state. Go to "oar" directory :
+Nodes are pre-provisioned and flagged with an "Absent" state Go to "oar" directory:
 
 ```bash
 nico@hpc-scheduler:~$ cd oar/
 ```
 
-We submit the first job :
+We submit the first job:
 
 ```bash
 nico@hpc-scheduler:~/oar$ oarsub -S ./infinite.oar
@@ -180,7 +180,7 @@ nico@hpc-scheduler:~/oar$ oarsub -S ./infinite.oar
 OAR_JOB_ID=1
 ```
 
-Immediately after the submission, we check the queue status :
+Immediately after the submission, we check the status of the queue:
 
 ```bash
 nico@hpc-scheduler:~/oar$ oarstat
@@ -193,7 +193,7 @@ Our job is pending, waiting for resources to appear.
 
 ### 5. Autoscaling up (horizontal scaling)
 
-Let's switch to another screen and get Pods status :
+Let's switch to another screen and get Pods status:
 
 ```bash
 root@admin:~# kubectl get pods
@@ -204,7 +204,7 @@ hpc-node-0      1/1     Running   0          36s
 hpc-scheduler   1/1     Running   0          4m28s
 ```
 
-A new node appeared. Go back to previous screen on the regular user session in "hpc-scheduler" Pod and check containerized compute nodes status :
+A new node appeared. Go back to previous screen on the regular user session in "hpc-scheduler" Pod and check containerized compute nodes status:
 
 ```bash
 nico@hpc-scheduler:~/oar$ oarnodes -s
@@ -219,7 +219,7 @@ hpc-node-2
     6 : Absent (standby)
 ```
 
-The containerized compute node "hpc-node-0" switched from "Absent" to "Alive" state. We check the state of our first job :
+The containerized compute node "hpc-node-0" switched from "Absent" to "Alive" state. We check the state of our first job:
 
 ```bash
 nico@hpc-scheduler:~/oar$ oarstat
@@ -232,7 +232,7 @@ The job is running on the new Pod created by the controller. The Pod "hpc-node-0
 
 ### 6. Autoscaling down
 
-We submit a second job :
+We submit a second job:
 
 ```bash
 nico@hpc-scheduler:~/oar$ oarsub -S ./infinite.oar
@@ -241,7 +241,7 @@ nico@hpc-scheduler:~/oar$ oarsub -S ./infinite.oar
 OAR_JOB_ID=2
 ```
 
-And check the queue immediately after :
+And check the queue immediately after:
 
 ```bash
 nico@hpc-scheduler:~/oar$ oarstat
@@ -251,7 +251,7 @@ Job id    S User     Duration   System message
 2         W nico        0:00:00 R=2,W=2:0:0,J=B,N=oarsub (Karma=0.000,quota_ok)
 ```
 
-The previous job is always running and the second is pending, waiting for resources to appear. Let's switch to another terminal to check Pods status :
+The previous job is always running and the second is pending, waiting for resources to appear. Let's switch to another terminal to check Pods status:
 
 ```bash
 root@admin:~# kubectl get pods
@@ -263,7 +263,7 @@ hpc-node-1      1/1     Running   0          43s
 hpc-scheduler   1/1     Running   0          19m
 ```
 
-A new Pod "hpc-node-1" appeared. Now, go back to user session :
+A new Pod "hpc-node-1" appeared. Now, go back to user session:
 
 ```bash
 nico@hpc-scheduler:~/oar$ oarstat
@@ -273,7 +273,7 @@ Job id    S User     Duration   System message
 2         R nico        0:00:47 R=2,W=2:0:0,J=B,N=oarsub (Karma=0.000,quota_ok)
 ```
 
-The second job is running on "hpc-node-1". Let's delete the first job :
+The second job is running on "hpc-node-1". Let's delete the first job:
 
 ```bash
 nico@hpc-scheduler:~/oar$ oardel 1
@@ -281,7 +281,7 @@ Deleting the job = 1 ...REGISTERED.
 The job(s) [ 1 ] will be deleted in the near future.
 ```
 
-Few seconds later, the job disappeared from the queue :
+Few seconds later, the job disappeared from the queue:
 
 ```bash
 nico@hpc-scheduler:~/oar$ oarstat
@@ -290,7 +290,7 @@ Job id    S User     Duration   System message
 2         R nico        0:01:38 R=2,W=2:0:0,J=B,N=oarsub (Karma=0.000,quota_ok)
 ```
 
-On the other terminal we can check the state of Pods :
+On the other terminal we can check the state of Pods:
 
 ```bash
 root@admin:~# kubectl get pods
@@ -302,7 +302,7 @@ hpc-node-1      1/1     Running       0          2m7s
 hpc-scheduler   1/1     Running       0          20m
 ```
 
-The Pod "hpc-node-0" is terminating. Few seconds it vanished :
+The Pod "hpc-node-0" is terminating. After few seconds it has disappeared from the list of Pods:
 
 ```bash
 root@admin:~# kubectl get pods
@@ -313,7 +313,7 @@ hpc-node-1      1/1     Running   0          2m28s
 hpc-scheduler   1/1     Running   0          21m
 ```
 
-We go back to user session to check the state of compute nodes :
+We go back to user session to check the state of compute nodes:
 
 ```bash
 nico@hpc-scheduler:~/oar$ oarnodes -s
