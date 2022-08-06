@@ -112,8 +112,8 @@ if __name__ == '__main__':
 	schedulerEnv = getEnvFromVariables(c, os.environ['OAR_SERVER_HOSTNAME'], os.environ['ALMIGHTY_CONTAINER'], os.environ['KUBERNETES_NAMESPACE'])
 
 	acknowlegedJobs = []
-	#cmd = ['/bin/bash', '/create-resources.sh', queues['default']['nodes'], queues['default']['cpuspernode'], queues['default']['hostnamebase']]
-	#subprocess.Popen(cmd).wait()
+	cmd = ['/bin/bash', '/create-resources.sh', queues['default']['nodes'], queues['default']['cpuspernode'], queues['default']['hostnamebase']]
+	subprocess.Popen(cmd).wait()
 
 	newpid = os.fork()
 	if newpid == 0:

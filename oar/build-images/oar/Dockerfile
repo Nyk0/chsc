@@ -10,6 +10,6 @@ RUN echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-f
   && mkdir -p /var/run/sshd \
   && pip install --upgrade pip && pip install kubernetes
 
-COPY start-almighty.sh start-node.sh generate-config.sh register.sh controller.py create-resources.sh ./
+COPY start-controller.sh start-almighty.sh start-node.sh generate-config.sh register.sh controller.py create-resources.sh ./
 
 CMD exec /bin/bash -c "trap : TERM INT; sleep infinity & wait"
