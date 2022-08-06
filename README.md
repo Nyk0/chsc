@@ -20,7 +20,7 @@ The virtual machine "CHSC-Lab-frontal" has two network interfaces, one configure
 
 Kubernetes installation is based on the basic procedure supplied by Google [here](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/). We wrote an Ansible deployment based on this procedure. You can find it [here](https://github.com/Nyk0/k8s-ansible).
 
-We defined a port redirection on Lab-frontal to reach the node from the localhost of your computer on port 2424. Default login/password is root/azerty for all virtual machines. To connect to the "CHSC-Lab-frontal node", type:
+We defined a port redirection on "CHSC-Lab-frontal" to reach the node from the localhost of your computer on port 2424. Default login/password is root/azerty for all virtual machines. To connect to the "CHSC-Lab-frontal node", type:
 
 ```bash
 nico@DESKTOP-KSGVO8B:~$ ssh -p 2424 root@localhost
