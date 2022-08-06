@@ -68,7 +68,7 @@ root@admin:~/chsc# kubectl config set-context --current --namespace=oar
 Context "kubernetes-admin@kubernetes" modified.
 ```
 
-Set the RBAC policy :
+Set the RBAC policy:
 
 ```bash
 root@admin:~/chsc# kubectl apply -f misc/rbac/rbac.yaml
